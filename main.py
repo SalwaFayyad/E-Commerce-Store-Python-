@@ -1,0 +1,803 @@
+#Salwa Fayyad 1200430
+#Sondos Ashraf 1200905
+
+import datetime
+from User import user
+from User import Shopper
+from Product import Product
+from enum import Enum
+import os
+
+# load users from a text file
+def readUserfile():
+    file_Path = "users.txt"
+    users_parts = []  # to load the file contents in the list
+
+    try:
+        with open(file_Path, "r") as file:
+            for line in file: #    # Create an empty list to store user data.
+                parts = line.strip().split(";") ## Split the line into parts using ';'
+                users_parts.append(parts)
+
+    except FileNotFoundError: # Handle the case where the file is not found.
+        print(f"The file '{file_Path}' was not found.")
+    except IOError: # Handle other IO errors.
+        print(f"An error occurred while reading the file '{file_Path}'.")
+
+    user_list = []
+    for attributes in users_parts:
+        if len(attributes) == 5: #This part for Admin , Admin has 5 attributes
+            id, name, date_b, role, active = attributes # Extract the attributes 
+            user_u = user(id, name, date_b, role, active)#get object from user class
+            user_u.addusers(id, name, date_b, role, active)#add users to class by addusers function
+
+        elif len(attributes) == 7: #This part for Shopper , Shopper has 7 attributes 
+            id, name, date_b, role, active, basket, order = attributes
+            user_u = Shopper(id, name, date_b, role, active, basket, order) #get object from shopper class
+            user_u.addusers(id, name, date_b, role, active, basket, order) #add shopper to class by addusers function
+
+    return user_u.getlist() #return the list from user class
+
+#Disply main menu by Role
+def Displey_menu(Role):
+    print("\n             E-COMMERCE STORE MENU          ")
+    if Role == "shopper": #shopper menu
+        flag = 0
+        print("1. List products (admin and shopper)")
+        print("2. Add product to the basket (shopper-only)")
+        print("3. Display basket (shopper-only)")
+        print("4. Update basket (shopper-only)")
+        print("5. Place order (shopper-only)")
+        print("6. Exit")
+        print("----------------------------------------------------------------------------------------------")
+
+
+    else:#admin menu
+        flag = 1
+        print("1. Add product (admin-only)")
+        print("2. Place an item on sale (admin-only)")
+        print("3. Update product (admin-only)")
+        print("4. Add a new user (admin-only)")
+        print("5. Update user (admin-only)")
+        print("6. Display all users (admin-only)")
+        print("7. List products (admin and shopper)")
+        print("8. List shoppers (admin)")
+        print("9. Execute order (admin-only)")
+        print("10. Save products to a file (admin-only)")
+        print("11. Save users to a text file (admin-only)")
+        print("12. Exit")
+        print("----------------------------------------------------------------------------------------------")
+
+    return flag
+
+#load products from a text file 
+def readProductfile():
+    file_Path = "products.txt"
+    products_parts = []  # to load the file contents in the list
+
+    try:
+        with open(file_Path, "r") as file:
+            for line in file:
+                parts = line.strip().split(";")
+                products_parts.append(parts)
+
+    except FileNotFoundError:
+        print(f"The file '{file_Path}' was not found.")
+    except IOError:
+        print(f"An error occurred while reading the file '{file_Path}'.")
+
+    user_list = []
+    for attributes in products_parts:
+        (id, name, category, price, inventory, supplier, hasOffer, offerPrice, validUntil) = attributes
+        #create object from product class and add attributes by using addproduct function
+        product_p = Product(id, name, category, price, inventory, supplier, hasOffer, offerPrice, validUntil)
+        product_p.addProducts(*attributes)
+
+    return product_p.getlist()
+
+#add new user
+def add_user(users):
+    while True:
+        new_id = input("User ID (Please enter the number contain 6 digits) ): ")
+
+        # Check if the ID already exists
+        id_exists = any(user_obj[0] == new_id for user_obj in users)
+        if id_exists:
+            print("The ID number already exists. Please choose another ID.")
+        # Check if the input is a 6-digit number and the ID is unique.
+        if new_id.isdigit() and len(new_id) == 6 and not id_exists: 
+            r = input("1] ADD ADMIN \n2] ADD SHOPPER\n")
+            new_name = input("USER NAME: ")
+            # Get the current date as the Date of Birth (DoB) and format it as "YYYY-MM-DD"
+            new_DoB = getDate()
+            new_DoB = new_DoB.strftime("%Y-%m-%d")
+            # Create a new user object with default values
+            new_active = 1
+            new_order = 0
+            new_basket = {}
+            #create object represented in its role
+            if int(r) == 1:
+                new_role = "admin"
+                new_user = user(new_id, new_name, new_DoB, new_role, new_active)
+                new_user.addusers(new_id, new_name, new_DoB, new_role, new_active)
+                users.append(new_user)
+                del users[len(users)-1]
+                break
+            print("User created successfully.")
+            if int(r) == 2:
+                new_role = "shopper"
+                new_user = Shopper(new_id, new_name, new_DoB, new_role, new_active, new_basket, new_order)
+                new_user.addusers(new_id, new_name, new_DoB, new_role, new_active, new_basket, new_order)
+
+                users.append(new_user)
+                del users[len(users)-1]  
+                break
+        else:            
+            print("Enter Valid User ID [from 6 digits]")        
+        
+        
+
+    return users
+
+#add new product
+def add_product(products):
+    while True:
+        new_id = input("Product_id: ")
+        # Check if the ID already exists
+        id_exists = any(product_obj[0] == new_id for product_obj in products)
+        if id_exists:
+            print("The ID number already exists. Please choose another Product ID.")
+        # Check if the input is a 6-digit number and the ID is unique.
+        if new_id.isdigit() and len(new_id) == 6 and not id_exists:
+            new_name = input("Product_name: ")
+            new_category = input("Product_category: ")
+            new_price = input("Price: ")
+            new_inventory = input("Inventory: ")
+            new_supplier = input("Supplier: ")
+            new_offer = input(
+                "Has_on_offer(enter 1 if the product on sale or 0 otherwise): "
+            )
+            #create new object with new values
+            new_product = Product(new_id, new_name, new_category, new_price, new_inventory, new_supplier, new_offer, 0, "0-0-0")
+            new_product.addProducts(new_id, new_name, new_category, new_price, new_inventory, new_supplier, new_offer, 0, "0-0-0")
+
+            products.append(new_product)
+
+            print("Product Added successfully.")
+            del products[len(products)-1]
+            break
+        else:            
+            print("Enter Valid Product ID [from 6 digits]")
+    return products
+
+# Define a function to get a valid date input from the user.
+def getDate():
+    while True:
+        # Get the date as input from the user in the format YYYY-MM-DD
+        user_input = input("Enter a date (YYYY-MM-DD): ")
+        # Try to parse the user input into a date object
+        try:
+            # Try to parse the user input into a date object using the specified format.
+            user_date = datetime.datetime.strptime(user_input, "%Y-%m-%d").date()
+            print("User input date:", user_date)
+            return user_date
+        except Exception as e:
+            print("Invalid date format. Please use YYYY-MM-DD.")
+            
+#update any field of the product other than the product id. 
+def update_product(products):
+    productfound = False
+    id = input("Product ID: ")
+
+    for productSearch in products:
+        if productSearch[0] == id:
+            productfound = True
+            print(f"ID found the product is {productSearch[1]} \n")
+            print(productSearch)
+            choise=8
+            while choise!=0:
+                print("\nChoose field to update or 0 to exit this option:")
+                print(
+                    "1.Product Name\n2.Product Category\n3.Price\n4.Inventory\n5.Supplier\n6.Has an offer\n7.Offer Price\n8.Offer validation date\n"
+                )
+                choise = int(input("Your choise: "))
+                for i in range(1, 8): #loop inested of if-else statements
+                    if i == choise:
+                        if i == 7: #date option
+                            newDate = getDate()
+                            productSearch[i + 1] = newDate.strftime("%Y-%m-%d")
+                        if i==6: #offer option
+                            productSearch[i]=input("Do you want to set offer?(1 if yes , 0 if no)")
+                            if(productSearch[i]==1):
+                                productSearch[i+1] = input("New Value: ")
+                                newDate = getDate()
+                                productSearch[i + 2] = newDate.strftime("%Y-%m-%d")
+                            else:
+                                productSearch[i+1]=0
+                                productSearch[i + 2]='0-0-0'
+                        else: #any option except date and Has offer
+                            productSearch[i] = input("New Value: ")
+                print("After update:")
+                print(productSearch)
+    if not productfound:
+        print("Product not found")
+
+#Place an item on sale
+def onSale(products):
+    productFound = False
+    id = input("Product ID: ")
+    for productSearch in products:
+        if productSearch[0] == id:
+            productFound = True
+            print(f"ID found the product is {productSearch[1]}")
+            productSearch[6] = 1  # has an offer = 1
+            offerPrice=int(input("\nEnter Offer Price: "))
+            while(offerPrice>=int(productSearch[3])): #check if offer price less than the main price
+                print("Offer Price must be less than the main Price")
+                offerPrice=int(input("Please Enter another Price: "))
+            productSearch[7] = offerPrice
+            productSearch[8] = getDate()
+            productSearch[8]= productSearch[8].strftime("%Y-%m-%d")
+
+            print("After update: ")
+            print(productSearch)
+    if not (productFound):
+        print("Product not exist")
+
+#update any field other than the user id
+def update_user(users):
+    id = input("Enter user ID you want update ")
+    for user_ubd in users:
+        if user_ubd[0] == id:
+            print(user_ubd)
+            if user_ubd[3] == "shopper":
+                print(
+                    user_ubd[1],
+                    user_ubd[2],
+                    user_ubd[3],
+                    user_ubd[4],
+                    user_ubd[5],
+                    user_ubd[6],
+                )
+                ch = input(
+                    "What fieled you want update:\n1]User Name\n2]User Date Of Birth\n3]User Role\n4]User Active\n5]User Order\n6]EXIT\n"
+                )
+
+                if int(ch) == 1:
+                    new_name = input("USER NAME: ")
+                    user_ubd[1] = new_name
+                elif int(ch) == 2:
+                    new_DoB = getDate()
+                    new_DoB = new_DoB.strftime("%Y-%m-%d")
+                    user_ubd[2] = new_DoB
+                elif int(ch) == 3:
+                    new_role = input("USER ROLE : ")
+                    user_ubd[3] = new_role
+                elif int(ch) == 4:
+                    new_active = input("ACTIVE : ")
+                    user_ubd[4] = new_active
+                elif int(ch) == 5:
+                    new_order = input("Order Finished (1) Not Yet (0) : ")
+                    if(user_ubd[3]=="shopper"):
+                        if(user_ubd[5]!="{}"):
+                            if new_order in ('0', '1'):
+                                user_ubd[6] = new_order
+                                print("Order status updated.")
+                            else:
+                                print("Invalid input. Please enter 0 or 1 to indicate order status.")
+                        else:
+                            print("Shopper's basket is empty ... No order has !!!")
+                    else:
+                        print("No order for admin user !!!")                
+                elif int(ch) == 6:
+                    break
+                update_us = Shopper(user_ubd[0],user_ubd[1],user_ubd[2],user_ubd[3],user_ubd[4],user_ubd[5],user_ubd[6])
+                update_us.update_user(user_ubd[0],user_ubd[1],user_ubd[2],user_ubd[3],user_ubd[4],user_ubd[5],user_ubd[6])
+
+            if user_ubd[3] == "admin":
+                ch = input(
+                    "What fieled you want update:\n1]User Name\n2]User Date Of Birth\n3]User Role\n4]User Active\n5]EXIT\n"
+                )
+
+                if int(ch) == 1:
+                    new_name = input("USER NAME: ")
+                    user_ubd[1] = new_name
+                if int(ch) == 2:
+                    new_DoB = getDate()
+                    new_DoB = new_DoB.strftime("%Y-%m-%d")
+                    user_ubd[2] = new_DoB
+                if int(ch) == 3:
+                    new_role = input("USER ROLE : ")
+                    user_ubd[3] = new_role
+                if int(ch) == 4:
+                    new_active = input("ACTIVE : ")
+                    user_ubd[4] = new_role
+
+                if int(ch) == 5:
+                    break
+                update_us = user(user_ubd[0],user_ubd[1],user_ubd[2],user_ubd[3],user_ubd[4])
+                update_us.update_user(user_ubd[0],user_ubd[1],user_ubd[2],user_ubd[3],user_ubd[4])
+
+#users List
+def DisplyUsers(users):
+    print("----------------------------------------------------------------------------------------------")    
+    print("                                        USERS LIST")
+    print("----------------------------------------------------------------------------------------------")
+
+    for index in users:
+        print(index)
+    print("----------------------------------------------------------------------------------------------")
+
+#products list    
+def DisplyProducts(products):
+    print("----------------------------------------------------------------------------------------------")
+    choise = int(input("Specify what you need:\n1.Display all products.\n2.Products of Offers.\n3Products Category\n4.Products Name\n"))
+    if choise == 1: #ALL products
+        print("----------------------------------------------------------------------------------------------")
+
+        print("                                     PRODUCTS LIST            ")
+        print("----------------------------------------------------------------------------------------------")
+
+        for index in products:
+            print(index)
+        print("----------------------------------------------------------------------------------------------")    
+
+
+    if choise == 2: #products that have offers/discount
+        print("----------------------------------------------------------------------------------------------")
+        print("                                 PRODUCTS IN OFFER LISTS")
+        print("----------------------------------------------------------------------------------------------")
+
+        for index in products:
+            if index[6] == "1":
+                print(index)
+        print("----------------------------------------------------------------------------------------------")
+
+    if choise == 3: #products belonging to a specific category.
+        category = input("Enter category you want:")
+        print("----------------------------------------------------------------------------------------------")
+
+        print(f"\n                      PRODUCTS WITH CATEGORY: {category} LISTS")
+        print("----------------------------------------------------------------------------------------------")
+
+        for index in products:
+            if index[2] == category:
+                print(index)
+        print("----------------------------------------------------------------------------------------------")
+
+    if choise == 4: #products with the name entered by the user
+        name = input("Enter name of product you want:")
+        print("----------------------------------------------------------------------------------------------")        
+        print(f"\nProduct with name {name} List")
+        print("----------------------------------------------------------------------------------------------")
+
+        for index in products:
+            if index[1] == name:
+                print(index)
+        print("----------------------------------------------------------------------------------------------")
+
+#shoppers list       
+def DisplayShoppers(users):
+    choise = int(
+        input("Specify what you need:\n1.ALL\n2. With items in the basket\n3. Has unprocessed orders\n")
+    )
+    if choise == 1: #all shoppers
+        print("----------------------------------------------------------------------------------------------")
+        print("                                    SHOPPER LISTS")
+        print("----------------------------------------------------------------------------------------------")
+
+        for index in users:
+            if index[3] == "shopper":
+                print(index)
+        print("----------------------------------------------------------------------------------------------")
+        
+    if choise == 2: #all shoppers that have added products for purchase to the basket.
+        print("----------------------------------------------------------------------------------------------")
+        print("                          SHOPPER WITH ITEMS IN THE BASKET LISTS")
+        print("----------------------------------------------------------------------------------------------")
+        for index in users:
+            if index[3] == "shopper":
+                if index[5] != "{}" and index[6]!="1": #check basket not empty
+
+                    print(index)
+        print("----------------------------------------------------------------------------------------------")
+            
+    if choise == 3: #all shoppers that have made an order and the order is still not processed by the admin.
+        print("----------------------------------------------------------------------------------------------")
+        print("               SHOPPERS THAT HAVE MADE AN ORDER AND THE ORDER IS STILL NOT PROCESSED")
+        print("----------------------------------------------------------------------------------------------")
+
+        for index in users:
+            if index[3] == "shopper":
+                if index[5] != "{}" and int(index[6]) == 1:
+                    print(index)
+        print("----------------------------------------------------------------------------------------------")
+
+#Add products to basket
+def addBasket(products, users, shopperID):
+    productfound = False
+    userfound = False
+    productId = input("Enter Product ID: ")
+    # Loop through the list of users to find the shopper
+    for user in users:
+        if user[0] == shopperID:
+            userfound = True
+            # Loop through the list of products to find the selected product
+            for index in products:
+                if index[0] == productId:
+                    productfound = True
+                    numberOfItems = int(input("Enter Number of items: "))
+                    flag=0 # for checking if the item in the basket or not
+                    for key,value in eval(user[5]).items(): 
+                        while(numberOfItems>int(index[4])):
+                            print("OUT OF STOCK !!!")
+                            print("It's just ",index[4])
+                            numberOfItems=int(input("Please choose another number of items: "))
+                        # Update the basket with the new item or increment its quantity
+                        input_dict = eval(user[5])
+                        if int(productId)==int(key):
+                            flag=1
+                            input_dict[key] = int(value)+int(numberOfItems)
+                            result_string = ("{"+ ",".join([f"{key}:{value}" for key, value in input_dict.items()]) + "}")
+                            user[5] = result_string
+                    # If the item is not in the basket, add it
+                    if flag==0:
+                            input_dict = eval(user[5])
+                            input_dict[productId]=numberOfItems
+                            result_string = ("{"+ ",".join([f"{key}:{value}" for key, value in input_dict.items()]) + "}")
+                            user[5] = result_string                            
+
+            if not productfound:
+                print("Product not Found")
+    if not userfound:
+        print("User not Found")
+
+#display the products in the basket 
+def DisplayBasket(products, users, shopperID, user_name):
+    print("----------------------------------------------------------------------------------------------")
+    print("                                THE BASKET LIST FOR", user_name)
+    print("----------------------------------------------------------------------------------------------")
+
+    # Loop through the list of users to find the shopper
+    for user in users:
+        if user[0] == shopperID:
+            user[5]=str(user[5]) # Ensure the user's basket data is a string
+            input_dict = eval(user[5])# Convert the basket data to a dictionary
+            sum = 0
+            # Loop through the items in the user's basket
+            for key, value in input_dict.items():
+                for index in products:
+                    # for index in products:
+                    if int(index[0]) == int(key):# Match the product ID with the basket item
+                        print("Product ID = ", index[0])
+                        print("Product Name = ", index[1])
+                        print("Product Category = ", index[2])
+                        print("Price= ", index[3])
+                        print("Inventory = ", index[4])
+                        print("Supplier = ", index[5])
+                        print("Has an OFFER = ", index[6])
+                        print("OFFER price = ", index[7])
+                        print("Valid until = ", index[8])
+                        print("Number of items = ", value)
+                        # If there is no offer, set the offer price to the main price
+                        if int(index[6]) == 0:
+                            index[7] = index[3]
+
+                        # Calculate and display the cost of the purchase for the product
+                        item_cost = int(value) * float(index[7])
+                        print("Cost of purchase of the product = ", item_cost)
+                        print("----------------------------------------------------------------------------------------------")
+
+                        sum += item_cost  # Add the item's cost to the total
+    print("Basket Cost = ", sum)
+    print("----------------------------------------------------------------------------------------------")
+
+#the shopper can update the basket Clear,Remove or Update number of items
+def Update_Basket(products, users, user_id):
+    up = input("Update your basket:\n1] Clear all products\n2] Remove specific product\n3] Update the number of items in a specific product\n")
+
+    for user in users:
+        if user[0] == user_id:
+            user[5] = eval(str(user[5]))
+            # Clear the entire basket
+            if int(up) == 1:
+                user[5].clear()
+                print("BASKET EMPTY")
+            # Remove a specific product from the basket
+            elif int(up) == 2:
+                del_item = input("Write the product key you want to remove from your basket: ")
+                if int(del_item) in user[5]:
+                    del user[5][int(del_item)]
+                    print(f"{del_item} Deleted Successfully")
+                else:
+                    print(f"{del_item} is not in the basket.")
+            # Update the number of items for a specific product in the basket
+            elif int(up) == 3:
+                up_pro = input("Write the product key you want to update in your basket: ")
+                up_num = input(f"Number of the product {up_pro}: ")
+                # Check if the item exists in the basket before updating
+                if int(up_pro) in user[5]:
+                    user[5][int(up_pro)] = int(up_num)
+                    print(f"-->{up_pro} updated to {up_num} in the basket.")
+                else:
+                    print(f"{up_pro} is not in the basket.")
+
+            # Display the updated basket
+            print("-->Updated basket:", user[5])
+
+#execute an order
+def Execute_order(products, users, shopper_id):
+    for user in users:
+        if int(user[0]) == int(shopper_id):
+            if(user[3]=="shopper"):# Check if the user is a shopper
+                user[5] = eval(user[5])
+                # Check if the shopper has placed an order (user[6] is a flag)
+                if int(user[6])==1 and user[5]!="{}":
+                    for product_key, quantity in user[5].items():
+                        print("----------------------------------------------------------------------------------------------")
+                        print(f"{product_key} : {quantity}")
+                        print("----------------------------------------------------------------------------------------------")
+
+                        for product in products:
+                            if int(product[0]) == int(product_key):
+                                inventory = int(product[4])
+                                # Check if there's enough quantity in stock
+                                if int(inventory) - int(quantity)>=0:
+                                    inventory -= int(quantity)
+                                    product[4] = inventory
+                                    print(f"Order for {quantity} of {product[1]} ({product_key}) is successful." )
+                                else:
+                                    print(f"Order for {inventory} of {product[1]} ({product_key}) is successful.")
+
+                                    product[4]=0
+                                    print(f"Insufficient stock for {product[1]} ({product_key}). Order not processed.")
+                    # Clear the user's basket after a successful order
+                    user[5].clear()
+                elif user[6]=="0" and user[5]=="{}":
+                    print("Basket's shopper is empty and no order for this shopper !!!")    
+                elif user[6]=="0":
+                    print("No order for this shopper!!!")  
+                elif user[5]=="{}":
+                    print("----------------------------------------------------------------------------------------------")
+                    print("Be sure that the basket for the shopper is not empty !!!")
+                    print("----------------------------------------------------------------------------------------------")
+
+                
+                    
+            else:
+                print("----------------------------------------------------------------------------------------------")
+                print("No order for ADMIN")        
+                print("----------------------------------------------------------------------------------------------")
+
+#request the purchase of items
+def placeOrder(users, shopperID):
+    #request the purchase of items by changing the value of the order field to 1
+    for user in users:
+        if user[0] == shopperID:
+            user[6] = 1
+            print("Order Placed")
+
+#save products to file
+def saveProduct(products):
+    file_name = input("Enter the filename to save the products (filename.txt)-->")
+    # Open the specified file in write mode and write the list of lists to the file
+    with open(file_name, "w") as file:
+        file.write("")
+        lines = len(products)
+        for product in products:
+            # Convert the list to a string and write it to the file
+            lines -= 1
+            if lines == 0:
+            # Convert the elements in the 'product' list to strings, join them with semicolons
+                file.write(";".join(map(str, product)))
+            else:
+                file.write(";".join(map(str, product)) + "\n")
+        print("Products successfully saved")
+
+#save users to file
+def saveUsers(users):
+    file_name = input("Enter the filename to save the users (filename.txt)-->")
+    with open(file_name, "w") as file:
+        file.write("")
+        lines = len(users)
+        for user in users:
+            # Convert the list to a string and write it to the file
+            lines -= 1
+            if lines == 0:
+                file.write(";".join(map(str, user)))
+            else:
+                file.write(";".join(map(str, user)) + "\n")
+        print("Users successfully saved")
+
+ # To print the basket information on shopper text file
+def DisplayBasketToFile(products, users, shopperID, user_name, file):
+    if os.path.exists(file):
+        os.remove(file)
+
+    with open(file, "w") as file:
+    
+        file.write("----------------------------------------------------------------------------------------------\n")
+        file.write(f"                                THE BASKET LIST FOR {user_name}\n")
+        file.write("----------------------------------------------------------------------------------------------\n")
+
+        # Loop through the list of users to find the shopper
+        for user in users:
+            if user[0] == shopperID:
+                user[5] = str(user[5])  # Ensure the user's basket data is a string
+                input_dict = eval(user[5])  # Convert the basket data to a dictionary
+                total_cost = 0
+
+                # Loop through the items in the user's basket
+                for key, value in input_dict.items():
+                    for index in products:
+                        if int(index[0]) == int(key):  # Match the product ID with the basket item
+                            file.write(f"Product ID = {index[0]}\n")
+                            file.write(f"Product Name = {index[1]}\n")
+                            file.write(f"Product Category = {index[2]}\n")
+                            file.write(f"Price = {index[3]}\n")
+                            file.write(f"Inventory = {index[4]}\n")
+                            file.write(f"Supplier = {index[5]}\n")
+                            file.write(f"Has an OFFER = {index[6]}\n")
+                            file.write(f"OFFER price = {index[7]}\n")
+                            file.write(f"Valid until = {index[8]}\n")
+                            file.write(f"Number of items = {value}\n")
+
+                            # If there is no offer, set the offer price to the main price
+                            if int(index[6]) == 0:
+                                index[7] = index[3]
+
+                            # Calculate and write the cost of the purchase for the product
+                            item_cost = int(value) * float(index[7])
+                            file.write(f"Cost of purchase of the product = {item_cost}\n")
+                            file.write("----------------------------------------------------------------------------------------------\n")
+
+                            total_cost += item_cost  # Add the item's cost to the total
+
+        file.write(f"Basket Cost = {total_cost}\n")
+        file.write("----------------------------------------------------------------------------------------------\n")
+        file.write("                                THANK YOU FOR SHOPPING\n")
+        file.write("----------------------------------------------------------------------------------------------")
+
+
+
+###############################################################################
+
+
+def main():
+    # Read user and product data from files
+    users = readUserfile()
+    products = readProductfile()
+    del products[0]
+    del users[0]
+    print("----------------------------------------------------------------------------------------------")
+    print("                                     WELCOME TO E-COMMERCE STORE        ")
+    print("----------------------------------------------------------------------------------------------")
+
+    print("LOG IN ")
+
+    while True:
+        # Get user ID to determine permissions
+        User_id = input("Please enter your ID to determine the Permission that you have: ")
+
+        # Initialize a flag to indicate if the user was found
+        user_found = False
+        role = ""
+
+        # Iterate through the list of users to find the user
+        for user_obj in users:
+            if user_obj[0] == User_id:
+                user_found = True
+                print("----------------------------------------------------------------------------------------------")
+                print(f"                                     WELCOME {user_obj[1]} :)")
+                print("----------------------------------------------------------------------------------------------")
+
+                if len(user_obj) == 7:
+                    new_user = Shopper(*user_obj[:7])
+                else:
+                    new_user = user(*user_obj[:5])
+                break
+
+        if user_found:
+            # Successful login, exit the login loop
+            break
+        else:
+            print("User not found. Please check your ID or contact the admin to be added to the E-Commerce Store.")
+            
+
+    while True:
+        # Get the role of the user (shopper or admin)
+        ROLE = new_user.Role
+        # Display the appropriate menu based on the user's role
+        flag = Displey_menu(ROLE)
+
+        if flag == 1:  # Admin menu
+            print("----------------------------------------------------------------------------------------------")
+            ch = input("Choose from [1-12] : ")
+            if int(ch) == 1:
+                products=add_product(products)
+            if int(ch) == 2:
+                onSale(products)
+            if int(ch) == 3:
+                update_product(products)
+            if int(ch) == 4:
+                add_user(users)
+            if int(ch) == 5:
+                update_user(users)
+            if int(ch) == 6:
+                DisplyUsers(users)
+            if int(ch) == 7:
+                DisplyProducts(products)
+            if int(ch) == 8:
+                DisplayShoppers(users)
+            if int(ch) == 9:
+                shopper_id = input("Enter Shopper ID you want to Execute: ")
+                Execute_order(products, users, shopper_id)
+                print("Order Executed Successfully")
+            if int(ch)==10:
+                saveProduct(products)
+            if int(ch) == 11:
+                saveUsers(users)
+            if int(ch) == 12:
+                save=input("Do you want save files before terminating? (y,n)-->")
+                if save=="y":
+                    s=input("Save User (u) Save Products (p) Save both (b)-->")
+                    if s=="u":
+                        saveUsers(users)
+                        break
+                    if s=="p":
+                        saveProduct(products)
+                        break
+                    if s=="b":
+                        saveProduct(products)
+                        saveUsers(users)
+                        break
+   
+                else:
+                    break
+                    
+            else:
+                print("Enter valid number from [1-12]")
+
+
+        if flag == 0:  # Shopper menu
+            ch = input("Choose from [1-6] : ")
+            if int(ch) == 1:
+                DisplyProducts(products)
+            if int(ch) == 2:
+                addBasket(products, users, User_id)                
+            if int(ch) == 3:
+                DisplayBasket(products, users, User_id, user_obj[1])
+            if int(ch) == 4:
+                print("----------------------------------------------------------------------------------------------")
+                print(f"{user_obj[1]}  {user_obj[5]} ")
+                print("----------------------------------------------------------------------------------------------")
+
+                Update_Basket(products, users, user_obj[0])
+            if int(ch) == 5:
+                print("----------------------------------------")
+                placeOrder(users, User_id)
+                print("----------------------------------------")
+
+            if int(ch) == 6:
+                save=input("Do you want save Your basket before terminating? (y,n)-->")
+                if save=="y":
+                    file=f"{User_id}_Basket.txt"
+                    DisplayBasketToFile(products,users,User_id,user_obj[1],file)
+                    print(f"--> {User_id}_Basket.txt Successfully save ")
+                    print("----------------------------------------------------------------------------------------------")
+                    print("                                THANK YOU FOR SHOPPING")
+                    print("----------------------------------------------------------------------------------------------")
+
+                    break
+                else :
+                    break
+
+            else:
+                print("Enter valid number from [1-6]")
+
+
+    print("-------------------------------------------------------")
+
+# Call the main function to start the program
+if __name__ == "__main__":
+    main()

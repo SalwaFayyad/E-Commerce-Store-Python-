@@ -1,0 +1,13 @@
+129050;Orange Jucie;Juice;3;6;JuiceComp;1;1;2023-01-20
+129020;Rose Perfume;Beauty;50;150;FragranceCo;1;39;2023-03-18
+129030;Running Shoes;Shoes;90;10;FootwearInc;1;75;2023-04-25
+129040;Banana Smoothie;Smoothie;4;200;SmoothieCo;1;2;2023-01-21
+129010;Strawberry Yogurt;Dairy;3;110;DairyCo;0;0;0-0-0
+129060;Smartphone;Electronics;600;50;TechGadget;1;559;2023-05-10
+129070;Chocolate Bars;Snacks;2;500;SnackCo;0;0;0-0-0
+129080;Blue Jeans;Clothes;40;200;FashionCo;0;0;0-0-0
+129090;Apple Juice Bottles;Juice;2.5;300;JuiceComp;0;0;0-0-0
+129100;Leather Sofa;Furniture;799.99;30;HomeComfort;0;0;0-0-0
+123444;Samsung fridge;FRIDGE;4500;50;Electronics;1;4250;2023-09-30
+129150;Apple Jucie;Juice;3;6;JuiceComp;1;1;2023-01-20
+129250;Banana Jucie;Juice;3;6;JuiceComp;1;1;2023-01-20

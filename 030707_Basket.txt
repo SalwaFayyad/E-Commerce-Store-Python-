@@ -1,0 +1,43 @@
+----------------------------------------------------------------------------------------------
+                                THE BASKET LIST FOR Ahmad Hussam
+----------------------------------------------------------------------------------------------
+Product ID = 129050
+Product Name = Orange Jucie
+Product Category = Juice
+Price = 3
+Inventory = 6
+Supplier = JuiceComp
+Has an OFFER = 1
+OFFER price = 1
+Valid until = 2023-01-20
+Number of items = 11
+Cost of purchase of the product = 11.0
+----------------------------------------------------------------------------------------------
+Product ID = 129030
+Product Name = Running Shoes
+Product Category = Shoes
+Price = 90
+Inventory = 10
+Supplier = FootwearInc
+Has an OFFER = 1
+OFFER price = 75
+Valid until = 2023-04-25
+Number of items = 3
+Cost of purchase of the product = 225.0
+----------------------------------------------------------------------------------------------
+Product ID = 129060
+Product Name = Smartphone
+Product Category = Electronics
+Price = 600
+Inventory = 50
+Supplier = TechGadget
+Has an OFFER = 1
+OFFER price = 559
+Valid until = 2023-05-10
+Number of items = 2
+Cost of purchase of the product = 1118.0
+----------------------------------------------------------------------------------------------
+Basket Cost = 1354.0
+----------------------------------------------------------------------------------------------
+                                THANK YOU FOR SHOPPING
+----------------------------------------------------------------------------------------------

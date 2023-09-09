@@ -1,0 +1,13 @@
+030707;Ahmad Hussam;2022-01-19;shopper;1;{129050:11,129030:3,129060:2};1
+022503;Fatima Abdelrahman;2022-07-05;admin;3
+040712;Youssef Al-Mansoori;2022-03-12;shopper;2;{129060:5,129010:2};0
+091505;Amina Mohamed;2022-09-08;admin;1
+112309;Salim Hamoudi;2022-06-15;shopper;4;{129060:9,129020:1};0
+032614;Noura Al-Saeed;2022-02-20;admin;2
+071802;Khaled Ibrahim;2022-04-10;shopper;3;{};0
+051204;Layla Hassan;2022-11-03;admin;1
+121411;Moussa Al-Darwish;2022-05-17;shopper;5;{129050:9,129060:4};1
+030708;Rana Mahmoud;2022-08-22;admin;2
+120090;sondos;2002-08-19;admin;1
+120043;Salwa Fayyad;2003-01-19;admin;1
+123456;Test;2003-01-19;shopper;1;{};1
