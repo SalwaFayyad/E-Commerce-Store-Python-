@@ -1,2 +1,3 @@
-# Python_project_Linux
-Read the report to see the project :).
+# Description
+This project entails building an online shopping system with specific functionalities tailored for both administrators and shoppers. Administrators have privileges such as adding, updating, and managing products and users, while shoppers can add products to their baskets, place orders, and manage their baskets. The system loads product and user data from text files, validates inputs, and provides clear error messages for invalid entries. Each option in the system serves a distinct purpose, from adding products to executing orders, with clear distinctions between admin-only and shopper-only functions. Additionally, the system allows for saving product and user data to text files and terminates upon user request, prompting for data saving before exit if necessary. The project is organized using GitHub repositories for collaborative development and version control.
+## See the report to show more about :)
